@@ -21,7 +21,8 @@ func main() {
 	sort.Strings(tags)
 
 	// Format: date--title--author__tag1..._tagN
-	var title, author, otherTags string
+	var title, otherTags string
+	author := ""
 
 	for _, tag := range tags {
 		if strings.HasPrefix(tag, "title=") {
@@ -30,21 +31,32 @@ func main() {
 		}
 
 		if strings.HasPrefix(tag, "name=") {
-			author = "--" + sanitize(strings.TrimLeft(tag, "name="))
-			continue
-		}
+			authors := strings.Split(strings.TrimLeft(tag, "name="), ",")
 
-		if len(otherTags) <= 0 {
-			otherTags = "_"
+			for _, name := range authors {
+				author += "_" + sanitize(name)
+			}
+
+			continue
 		}
 
 		otherTags += "_" + sanitize(tag)
 	}
 
+	if len(title) <= 0 {
+		inputFileNoExtension := strings.TrimRight(inputFile, filepath.Ext(inputFile))
+		title = "--" + sanitize(inputFileNoExtension)
+	}
+
 	currentTime := time.Now()
 	identifier := currentTime.Format("20060102T150405")
 
-	result := identifier + title + author + otherTags + filepath.Ext(inputFile)
+	separator := ""
+	if len(author) > 0 || len(otherTags) > 0 {
+		separator = "_"
+	}
+
+	result := identifier + title + separator + author + otherTags + filepath.Ext(inputFile)
 	err := os.Rename(inputFile, result)
 	if err != nil {
 		log.Fatal(err)
