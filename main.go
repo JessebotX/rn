@@ -26,12 +26,12 @@ func main() {
 
 	for _, tag := range tags {
 		if strings.HasPrefix(tag, "title=") {
-			title = "--" + sanitize(strings.TrimLeft(tag, "title="))
+			title = "--" + sanitize(strings.TrimPrefix(tag, "title="))
 			continue
 		}
 
 		if strings.HasPrefix(tag, "name=") {
-			authors := strings.Split(strings.TrimLeft(tag, "name="), ",")
+			authors := strings.Split(strings.TrimPrefix(tag, "name="), ",")
 
 			for _, name := range authors {
 				author += "_" + sanitize(name)
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	if len(title) <= 0 {
-		inputFileNoExtension := strings.TrimRight(inputFile, filepath.Ext(inputFile))
+		inputFileNoExtension := strings.TrimSuffix(inputFile, filepath.Ext(inputFile))
 		title = "--" + sanitize(inputFileNoExtension)
 	}
 
@@ -67,7 +67,7 @@ func sanitize(text string) string {
 	excludedPunctuationRegexp := regexp.MustCompile("[][{}!@#$%^&*()=+'\"?,.|;:~`‘’“”/]*")
 
 	textRemovedPunctuation := excludedPunctuationRegexp.ReplaceAllString(text, "")
-	textTrimmed := strings.Trim(textRemovedPunctuation, " ")
+	textTrimmed := strings.TrimSpace(textRemovedPunctuation)
 	textLowercased := strings.ToLower(textTrimmed)
 	fillSpaces := strings.ReplaceAll(textLowercased, " ", "-")
 
